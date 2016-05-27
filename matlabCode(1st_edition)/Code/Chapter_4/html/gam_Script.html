@@ -1,0 +1,271 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>gam_Script</title><meta name="generator" content="MATLAB 8.5"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-04-21"><meta name="DC.source" content="gam_Script.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><pre class="codeinput"><span class="comment">% Exercise 4.6 - the gamblers problem.</span>
+<span class="comment">%</span>
+<span class="comment">% See the Sutton book.</span>
+<span class="comment">%</span>
+<span class="comment">% Written by:</span>
+<span class="comment">% --</span>
+<span class="comment">% John L. Weatherwax                2007-12-03</span>
+<span class="comment">%</span>
+<span class="comment">% email: wax@alum.mit.edu</span>
+<span class="comment">%</span>
+<span class="comment">% Please send comments and especially bug reports to the</span>
+<span class="comment">% above email address.</span>
+<span class="comment">%</span>
+<span class="comment">%-----</span>
+
+clc;
+close <span class="string">all</span>;
+
+<span class="comment">% we have an undiscounted task:</span>
+gamma = 1;
+
+<span class="comment">% the number of states (0 and 100 are terminal states)</span>
+n_non_term_states=99;
+<span class="comment">%n_non_term_states=1022;</span>
+n_states=n_non_term_states+2;
+
+<span class="comment">% initialize state value function (including terminal states):</span>
+V = zeros(1,n_states); V(1)=0.0; V(end)=1.0;
+
+<span class="comment">% the probability our coin lands heads:</span>
+<span class="comment">%p_heads = 0.3;</span>
+p_heads = 0.4;
+
+thetaThreshold = 1e-8;
+
+<span class="comment">% plot these iterations:</span>
+plotIters = [ 1, 2, 3, 32 ];
+
+delta = +Inf; iterCnts = 0;
+fhs=figure; hold <span class="string">on</span>; grid <span class="string">on</span>;
+<span class="comment">%fhp=figure; hold on; grid on;</span>
+<span class="keyword">while</span>( delta &gt; thetaThreshold )
+  iterCnts=iterCnts+1;
+
+  delta = 0;
+  <span class="comment">% loop over all NON TERMINAL states:</span>
+  <span class="keyword">for</span> si=2:n_states-1,
+    v = V(si);
+    s = si-1;  <span class="comment">% the state \in [1,\cdots,99]</span>
+    <span class="comment">% get the possible actions in this state (not lower bound of ONE ... zero seems like a unreasonable action)</span>
+    acts = 1:min(s,(n_states-1)-s); Q = [];
+
+    <span class="keyword">for</span> ai=1:length(acts),
+      Q(ai) = gam_rhs_state_bellman(s,acts(ai),V,gamma,p_heads);
+    <span class="keyword">end</span> <span class="comment">% end action loop</span>
+    V(si) = max(Q);
+    delta = max(delta,abs(v-V(si)));
+  <span class="keyword">end</span> <span class="comment">% end state loop</span>
+  <span class="keyword">if</span>( isempty( setdiff( [iterCnts], plotIters ) ) )
+    figure(fhs); plot( 0:(n_states-1), V, <span class="string">'-x'</span> ); axis <span class="string">tight</span>; drawnow;
+  <span class="keyword">end</span>
+<span class="keyword">end</span>
+figure(fhs); plot( 0:(n_states-1), V, <span class="string">'-go'</span> ); xlabel(<span class="string">'capital'</span>); ylabel(<span class="string">'value ests.'</span>); axis <span class="string">tight</span>; drawnow;
+fn=<span class="string">'gam_state_value_fns.eps'</span>; saveas( gcf, fn, <span class="string">'epsc'</span> );
+
+<span class="comment">% compute the greedy policy at each timestep:</span>
+<span class="comment">%</span>
+eps_pol = 1e-8;
+<span class="comment">%eps_pol = 0;</span>
+pol_pi  = zeros(1,n_states-2);
+<span class="comment">% loop over all non-terminal states:</span>
+<span class="keyword">for</span> si=2:n_states-1,
+  s = si-1;  <span class="comment">% the state \in [1,\cdots,99]</span>
+  <span class="comment">% get the possible actions in this state (no zero action)</span>
+  acts = 1:min(s,(n_states-1)-s);
+  <span class="comment">%acts = fliplr(acts); % try to reverse the order of the actions presented and see if we get a different policy</span>
+
+  Q = []; bestVal=-Inf; bestAct=0;
+  <span class="keyword">for</span> ai=1:length(acts),
+    Q(ai) = gam_rhs_state_bellman(s,acts(ai),V,gamma,p_heads);
+    <span class="comment">%--</span>
+    <span class="comment">% assume that we have to beat an earlier policy by at least eps_pol</span>
+    <span class="comment">% this seems to encourage plays with the smallest bets</span>
+    <span class="comment">%--</span>
+    <span class="keyword">if</span>( bestVal&lt;(Q(ai)-eps_pol) )
+      bestVal=Q(ai);
+      bestAct=ai;
+    <span class="keyword">end</span>
+  <span class="keyword">end</span> <span class="comment">% end action loop</span>
+
+  pol_pi(si-1) = bestAct;
+
+<span class="keyword">end</span> <span class="comment">% end state loop</span>
+<span class="keyword">if</span>( 1 ) <span class="comment">%isempty( setdiff( [iterCnts], plotIters ) ) )</span>
+  figure; stairs( 1:(n_states-2), pol_pi ); xlabel(<span class="string">'capital'</span>); ylabel(<span class="string">'last policy'</span>); axis <span class="string">tight</span>; drawnow;
+  fn=<span class="string">'gam_final_policy.eps'</span>; saveas( gcf, fn, <span class="string">'epsc'</span> );
+<span class="keyword">end</span>
+
+<span class="keyword">return</span>;
+</pre><img vspace="5" hspace="5" src="gam_Script_01.png" alt=""> <img vspace="5" hspace="5" src="gam_Script_02.png" alt=""> <p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2015a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+% Exercise 4.6 - the gamblers problem.
+% 
+% See the Sutton book.
+% 
+% Written by:
+% REPLACE_WITH_DASH_DASH 
+% John L. Weatherwax                2007-12-03
+% 
+% email: wax@alum.mit.edu
+% 
+% Please send comments and especially bug reports to the
+% above email address.
+% 
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+
+clc; 
+close all; 
+
+% we have an undiscounted task: 
+gamma = 1;
+
+% the number of states (0 and 100 are terminal states) 
+n_non_term_states=99; 
+%n_non_term_states=1022; 
+n_states=n_non_term_states+2;
+
+% initialize state value function (including terminal states): 
+V = zeros(1,n_states); V(1)=0.0; V(end)=1.0; 
+
+% the probability our coin lands heads: 
+%p_heads = 0.3; 
+p_heads = 0.4; 
+
+thetaThreshold = 1e-8; 
+
+% plot these iterations: 
+plotIters = [ 1, 2, 3, 32 ]; 
+
+delta = +Inf; iterCnts = 0; 
+fhs=figure; hold on; grid on;
+%fhp=figure; hold on; grid on;
+while( delta > thetaThreshold )
+  iterCnts=iterCnts+1;
+  
+  delta = 0; 
+  % loop over all NON TERMINAL states: 
+  for si=2:n_states-1,    
+    v = V(si);
+    s = si-1;  % the state \in [1,\cdots,99]
+    % get the possible actions in this state (not lower bound of ONE ... zero seems like a unreasonable action)
+    acts = 1:min(s,(n_states-1)-s); Q = []; 
+    
+    for ai=1:length(acts),
+      Q(ai) = gam_rhs_state_bellman(s,acts(ai),V,gamma,p_heads); 
+    end % end action loop 
+    V(si) = max(Q);
+    delta = max(delta,abs(v-V(si)));
+  end % end state loop 
+  if( isempty( setdiff( [iterCnts], plotIters ) ) )
+    figure(fhs); plot( 0:(n_states-1), V, '-x' ); axis tight; drawnow; 
+  end
+end
+figure(fhs); plot( 0:(n_states-1), V, '-go' ); xlabel('capital'); ylabel('value ests.'); axis tight; drawnow; 
+fn='gam_state_value_fns.eps'; saveas( gcf, fn, 'epsc' ); 
+
+% compute the greedy policy at each timestep: 
+% 
+eps_pol = 1e-8; 
+%eps_pol = 0; 
+pol_pi  = zeros(1,n_states-2); 
+% loop over all non-terminal states: 
+for si=2:n_states-1,    
+  s = si-1;  % the state \in [1,\cdots,99]
+  % get the possible actions in this state (no zero action)
+  acts = 1:min(s,(n_states-1)-s);
+  %acts = fliplr(acts); % try to reverse the order of the actions presented and see if we get a different policy 
+  
+  Q = []; bestVal=-Inf; bestAct=0; 
+  for ai=1:length(acts),
+    Q(ai) = gam_rhs_state_bellman(s,acts(ai),V,gamma,p_heads);
+    %REPLACE_WITH_DASH_DASH
+    % assume that we have to beat an earlier policy by at least eps_pol 
+    % this seems to encourage plays with the smallest bets
+    %REPLACE_WITH_DASH_DASH
+    if( bestVal<(Q(ai)-eps_pol) )   
+      bestVal=Q(ai);
+      bestAct=ai; 
+    end
+  end % end action loop 
+  
+  pol_pi(si-1) = bestAct; 
+  
+end % end state loop 
+if( 1 ) %isempty( setdiff( [iterCnts], plotIters ) ) )
+  figure; stairs( 1:(n_states-2), pol_pi ); xlabel('capital'); ylabel('last policy'); axis tight; drawnow; 
+  fn='gam_final_policy.eps'; saveas( gcf, fn, 'epsc' ); 
+end
+
+return; 
+
+##### SOURCE END #####
+--></body></html>
