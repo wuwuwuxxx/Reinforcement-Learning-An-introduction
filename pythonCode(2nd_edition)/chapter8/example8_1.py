@@ -12,7 +12,7 @@ import time
 maze = init_maze()
 h, w = maze.shape
 actions = 4
-Q = np.random.random((h, w, actions))
+Q = np.zeros((h, w, actions))
 eps = 0.1
 gamma = 0.95
 alpha = 0.5
@@ -40,10 +40,10 @@ def take_action(r, c, a, m):
 		col = min(c+1, 8)
 		row = r
 	if m[row, col]==1:
-		return 0, r, c
+		return -1, r, c
 	elif row==0 and col==8:
 		return 1, row, col
-	return 0, row, col
+	return -1, row, col
 
 def plan(seen, Q, n, alpha, gamma):
 	keys = seen.keys()
@@ -54,7 +54,7 @@ def plan(seen, Q, n, alpha, gamma):
 	return Q
 
 start = time.time()
-for k in xrange(5):
+for k in xrange(10):
 	row = 2
 	col = 0
 	while True:
@@ -72,7 +72,7 @@ print time.time()-start
 
 row = 2
 col = 0
-for k in xrange(5):
+for k in xrange(50):
 	step = k
 	maze[row, col] = 2
 	reward, new_row, new_col = take_action(row, col, policy[row, col], maze)
