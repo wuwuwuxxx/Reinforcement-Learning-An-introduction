@@ -32,18 +32,18 @@ def boundv(v):
 
 def take_action(p, v, a):
     newv = boundv(v + 0.001 * a - 0.0025 * math.cos(3 * p))
-    newp = boundp(p + newv)
+    newp = boundp(p + v)
     if newp >= 0.5:
         return newp, newv, 0
     return newp, newv, -1
 
 
-def get_action(q):
-    action = np.argmax(q) - 1
-    if np.random.random() < 0.1:
-        k = np.random.randint(-1, 2)
-        return k, q[k + 1]
-    return action, q[action + 1]
+# def get_action(q):
+#     action = np.argmax(q) - 1
+#     if np.random.random() < 0.01:
+#         k = np.random.randint(-1, 2)
+#         return k, q[k + 1]
+#     return action, q[action + 1]
 
 
 p_interval = (0.5 + 1.2) / 9
@@ -58,7 +58,7 @@ v_offsets = np.random.random(tils) * v_interval
 theta = np.zeros((10, 10, tils, 3))
 
 for k in xrange(10000):
-    # print k
+    print k
     e = np.zeros((10, 10, tils, 3))
     p, v = init_state()
     while True:
@@ -70,13 +70,13 @@ for k in xrange(10000):
             temp_q.append(np.sum(theta*index))
         astar = np.argmax(temp_q)-1
         a = astar
-        if np.random.random()<0.1:
-            a = np.random.randint(-1, 2)
-        if a != astar:
-            e = 0
+        # if np.random.random()<0.05:
+        #     a = np.random.randint(-1, 2)
+        # if a != astar:
+        #     e = 0
         newp, newv, reward = take_action(p, v, a)
         delta = reward - temp_q[a+1]
-        e += indices[a+1]
+        e = indices[a+1]
         if reward == 0:
             theta += alpha * delta * e
             break
@@ -90,7 +90,7 @@ for k in xrange(10000):
         p = newp
         v = newv
 
-steps = 100
+steps = 200
 postions = np.linspace(-1.2, 0.5, steps)
 velocity = np.linspace(-0.07, 0.07, steps)
 value = np.zeros((steps, steps))
