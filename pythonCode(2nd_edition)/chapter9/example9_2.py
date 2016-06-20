@@ -76,7 +76,7 @@ for k in xrange(10000):
         #     e = 0
         newp, newv, reward = take_action(p, v, a)
         delta = reward - temp_q[a+1]
-        e = indices[a+1]
+        e[indices[a+1]==1] = 1
         if reward == 0:
             theta += alpha * delta * e
             break
